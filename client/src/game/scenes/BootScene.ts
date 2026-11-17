@@ -1,40 +1,34 @@
 import Phaser from 'phaser';
-import { playerColorSchema, type PlayerColor } from '@stellar/shared';
+import { SKYWARD_TILED } from '@stellar/shared';
+import tilesetUrl from '@stellar/shared/maps/skyward-tiles.png?url';
 import { ensureAllCharacterTextures } from '../art/characterTextures';
-import { ensureEnvironmentTextures } from '../art/environmentTextures';
-import type { GameBridge } from '../bridge/GameBridge';
-import { SHIP_TEST_SCENE_KEY, type ShipTestSceneData } from './ShipTestScene';
+import type { SceneDeps } from './sceneDeps';
+import { SHIP_SCENE_KEY } from './ShipScene';
 
 export const BOOT_SCENE_KEY = 'BootScene';
+export const MAP_KEY = 'skyward';
+export const TILESET_KEY = 'skyward-tiles';
 
-/**
- * Prepares shared resources (textures, animations) and starts the world scene.
- * When real assets arrive, their `this.load.*` calls go into `preload()` here.
- */
+/** Loads the Tiled map + tileset and generates character textures, then starts the world. */
 export class BootScene extends Phaser.Scene {
-  private bridge!: GameBridge;
+  private deps!: SceneDeps;
 
   constructor() {
     super(BOOT_SCENE_KEY);
   }
 
-  init(data: { bridge: GameBridge }): void {
-    this.bridge = data.bridge;
+  init(data: SceneDeps): void {
+    this.deps = data;
+  }
+
+  preload(): void {
+    // The Tiled JSON is bundled with the shared package (same file the server parses).
+    this.load.tilemapTiledJSON(MAP_KEY, SKYWARD_TILED as unknown as object);
+    this.load.image(TILESET_KEY, tilesetUrl);
   }
 
   create(): void {
-    ensureEnvironmentTextures(this);
     ensureAllCharacterTextures(this);
-
-    const sceneData: ShipTestSceneData = { bridge: this.bridge, color: readColorFromUrl() };
-    this.scene.start(SHIP_TEST_SCENE_KEY, sceneData);
+    this.scene.start(SHIP_SCENE_KEY, this.deps);
   }
-}
-
-/** Dev helper until the lobby exists (stage 4): `?color=red`. */
-function readColorFromUrl(): PlayerColor {
-  const parsed = playerColorSchema.safeParse(
-    new URLSearchParams(window.location.search).get('color'),
-  );
-  return parsed.success ? parsed.data : 'cyan';
 }

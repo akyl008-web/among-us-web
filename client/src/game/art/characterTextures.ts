@@ -17,15 +17,17 @@ export const CHARACTER_FRAMES = [
   'walk-1',
   'walk-2',
   'walk-3',
+  'dead',
 ] as const;
 type CharacterFrame = (typeof CHARACTER_FRAMES)[number];
+type PoseFrame = Exclude<CharacterFrame, 'dead'>;
 
 export const characterTextureKey = (color: PlayerColor) => `character-${color}`;
 export const characterAnimKey = (color: PlayerColor, anim: 'idle' | 'walk') =>
   `character-${color}-${anim}`;
 
 /** Per-frame pose: vertical body bob and left/right foot lift (px). */
-const POSES: Record<CharacterFrame, { bob: number; leftLift: number; rightLift: number }> = {
+const POSES: Record<PoseFrame, { bob: number; leftLift: number; rightLift: number }> = {
   'idle-0': { bob: 0, leftLift: 0, rightLift: 0 },
   'idle-1': { bob: 1, leftLift: 0, rightLift: 0 },
   'walk-0': { bob: 0, leftLift: 4, rightLift: 0 },
@@ -39,6 +41,28 @@ function shade(color: number, amount: number): number {
   return amount >= 0 ? c.lighten(amount).color : c.darken(-amount).color;
 }
 
+/** Fallen robot (body left after elimination): lying capsule, cracked visor, sparks. */
+function drawDeadFrame(g: Phaser.GameObjects.Graphics, ox: number, body: number) {
+  const outline = shade(body, -45);
+  const dark = shade(body, -20);
+  g.fillStyle(0x000000, 0.3);
+  g.fillEllipse(ox + 24, 52, 44, 10);
+  g.fillStyle(outline);
+  g.fillRoundedRect(ox + 3, 34, 42, 20, 9);
+  g.fillStyle(dark);
+  g.fillRoundedRect(ox + 5, 36, 38, 16, 7);
+  g.fillStyle(body);
+  g.fillRoundedRect(ox + 5, 36, 34, 12, 6);
+  g.fillStyle(0x334155);
+  g.fillRoundedRect(ox + 30, 38, 12, 8, 3);
+  g.lineStyle(2, 0xe2e8f0);
+  g.lineBetween(ox + 32, 39, ox + 38, 45);
+  g.lineBetween(ox + 38, 39, ox + 32, 45);
+  g.fillStyle(0xfacc15);
+  g.fillTriangle(ox + 10, 30, ox + 14, 24, ox + 15, 31);
+  g.fillTriangle(ox + 20, 29, ox + 23, 22, ox + 25, 30);
+}
+
 /** Draws one frame of the "astro-bot" at offset (ox, 0). Faces right; flipX for left. */
 function drawFrame(
   g: Phaser.GameObjects.Graphics,
@@ -46,6 +70,10 @@ function drawFrame(
   body: number,
   frame: CharacterFrame,
 ) {
+  if (frame === 'dead') {
+    drawDeadFrame(g, ox, body);
+    return;
+  }
   const { bob, leftLift, rightLift } = POSES[frame];
   const outline = shade(body, -45);
   const dark = shade(body, -20);

@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
 import { useEffect, useRef } from 'react';
+import type { GameSession } from '../net/GameSession';
 import type { GameBridge } from './bridge/GameBridge';
 import { createGame } from './createGame';
 
 interface PhaserGameProps {
   bridge: GameBridge;
+  session: GameSession;
 }
 
 /**
@@ -15,7 +17,7 @@ interface PhaserGameProps {
  * it directly would leave a zombie game + second canvas. Creation is deferred by one
  * tick: StrictMode's instant re-mount cancels the first timer, so exactly one game exists.
  */
-export default function PhaserGame({ bridge }: PhaserGameProps) {
+export default function PhaserGame({ bridge, session }: PhaserGameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,18 +25,20 @@ export default function PhaserGame({ bridge }: PhaserGameProps) {
     if (!container) return;
 
     let game: Phaser.Game | null = null;
+    const lifetime = new AbortController();
     const timer = window.setTimeout(() => {
-      game = createGame(container, bridge);
+      game = createGame(container, { bridge, session, signal: lifetime.signal });
     }, 0);
 
     return () => {
       window.clearTimeout(timer);
+      lifetime.abort();
       const current = game;
       if (!current) return;
       if (current.isBooted) current.destroy(true);
       else current.events.once(Phaser.Core.Events.READY, () => current.destroy(true));
     };
-  }, [bridge]);
+  }, [bridge, session]);
 
   return <div ref={containerRef} className="game-canvas" />;
 }

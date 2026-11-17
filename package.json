@@ -2,7 +2,7 @@
   "name": "stellar-suspects",
   "version": "0.1.0",
   "private": true,
-  "description": "Stellar Suspects — browser multiplayer social deduction game (monorepo)",
+  "description": "Stellar Suspects \u2014 browser multiplayer social deduction game (monorepo)",
   "type": "module",
   "workspaces": [
     "shared",
@@ -28,7 +28,12 @@
     "test": "npm run build -w @stellar/shared && vitest run",
     "test:watch": "vitest",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run test",
-    "clean": "node scripts/clean.mjs"
+    "clean": "node scripts/clean.mjs",
+    "postinstall": "npm run db:generate -w @stellar/server",
+    "db:migrate": "npm run db:migrate -w @stellar/server",
+    "db:studio": "npm run db:studio -w @stellar/server",
+    "map:generate": "node scripts/generate-map.mjs",
+    "bots": "node scripts/bots.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -41,6 +46,7 @@
     "prettier": "3.10.1",
     "typescript": "6.0.3",
     "typescript-eslint": "8.73.0",
-    "vitest": "5.1.0"
+    "vitest": "5.1.0",
+    "socket.io-client": "4.8.4"
   }
 }

@@ -1,16 +1,16 @@
 import { TypedEventEmitter } from '../../lib/TypedEventEmitter';
+import type { Proximity } from '../world/proximity';
 
 /**
  * Contract between React (UI) and Phaser (world).
  * React → Phaser: commands ("ui:*"). Phaser → React: notifications ("game:*").
- * Extend these maps as features are added; both sides stay decoupled.
  */
 export interface GameBridgeEvents {
   [key: string]: unknown;
   'game:ready': { sceneKey: string };
-  'game:fps': { fps: number };
-  'game:playerPosition': { x: number; y: number };
-  'ui:pause': { paused: boolean };
+  'game:proximity': Proximity;
+  'game:location': { room: string | null };
+  'ui:inputLocked': { locked: boolean };
 }
 
 export type GameBridge = TypedEventEmitter<GameBridgeEvents>;

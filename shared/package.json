@@ -9,7 +9,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./maps/*": "./src/maps/*"
   },
   "scripts": {
     "build": "tsc -b",
@@ -18,5 +19,9 @@
   },
   "dependencies": {
     "zod": "4.6.7"
-  }
+  },
+  "files": [
+    "dist",
+    "src/maps"
+  ]
 }

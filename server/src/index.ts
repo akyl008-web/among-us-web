@@ -1,12 +1,27 @@
 import { loadConfig } from './config/env.js';
 import { createServer } from './createServer.js';
+import { createPersistence } from './db/index.js';
 import { logger } from './lib/logger.js';
 
 const config = loadConfig();
-const server = createServer(config);
+if (config.authSecretIsEphemeral) {
+  logger.warn('AUTH_SECRET is not set — using a random one (logins reset on restart)');
+}
+
+const persistence = await createPersistence(config.DATABASE_URL);
+const server = createServer({
+  corsOrigins: config.CLIENT_ORIGIN,
+  authSecret: config.AUTH_SECRET,
+  minPlayers: config.MIN_PLAYERS,
+  persistence,
+  serveClient: config.SERVE_CLIENT,
+  trustProxy: config.TRUST_PROXY,
+});
 
 server.httpServer.listen(config.PORT, config.HOST, () => {
-  logger.info(`Server listening on http://localhost:${config.PORT} (${config.NODE_ENV})`);
+  logger.info(
+    `Server listening on http://localhost:${config.PORT} (${config.NODE_ENV}, min players ${config.MIN_PLAYERS}, storage ${persistence.kind})`,
+  );
 });
 
 server.httpServer.on('error', (err: NodeJS.ErrnoException) => {

@@ -1,0 +1,85 @@
+// Persistent data only. Temporary match state (positions, votes, live roles)
+// lives in server memory and is never written here while a match is running.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String         @id @default(uuid())
+  username     String         @unique
+  /// scrypt hash, never the plain password
+  passwordHash String
+  createdAt    DateTime       @default(now())
+  profile      PlayerProfile?
+}
+
+/// Public profile. Contains no role information.
+model PlayerProfile {
+  id             String             @id @default(uuid())
+  userId         String             @unique
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName    String
+  preferredColor String             @default("cyan")
+  gamesPlayed    Int                @default(0)
+  gamesWon       Int                @default(0)
+  tasksCompleted Int                @default(0)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  participations MatchParticipant[]
+
+  @@index([gamesWon])
+}
+
+model Match {
+  id            String             @id @default(uuid())
+  roomCode      String
+  startedAt     DateTime
+  endedAt       DateTime
+  winner        String
+  winReason     String
+  playerCount   Int
+  impostorCount Int
+  participants  MatchParticipant[]
+  statistics    MatchStatistics?
+
+  @@index([endedAt])
+}
+
+/// One player's result in a finished match. `role` is private: exposed only to the owner.
+model MatchParticipant {
+  id             String         @id @default(uuid())
+  matchId        String
+  match          Match          @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  profileId      String?
+  profile        PlayerProfile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  displayName    String
+  color          String
+  role           String
+  won            Boolean
+  survived       Boolean
+  tasksCompleted Int
+  kills          Int
+
+  @@index([profileId])
+  @@index([matchId])
+}
+
+model MatchStatistics {
+  id             String @id @default(uuid())
+  matchId        String @unique
+  match          Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  durationSec    Int
+  totalKills     Int
+  meetings       Int
+  ejections      Int
+  tasksCompleted Int
+  sabotages      Int
+}

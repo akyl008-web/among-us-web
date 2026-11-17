@@ -1,5 +1,10 @@
 export * from './constants.js';
 export * from './events.js';
 export * from './game.js';
+export * from './map/collision.js';
+export * from './map/gameMap.js';
+export type * from './map/tiled.js';
+export * from './maps/index.js';
 export * from './movement.js';
+export * from './protocol.js';
 export * from './schemas.js';

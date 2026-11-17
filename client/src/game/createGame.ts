@@ -1,34 +1,30 @@
 import Phaser from 'phaser';
-import type { GameBridge } from './bridge/GameBridge';
 import { BOOT_SCENE_KEY, BootScene } from './scenes/BootScene';
-import { SHIP_TEST_SCENE_KEY, ShipTestScene } from './scenes/ShipTestScene';
+import type { SceneDeps } from './scenes/sceneDeps';
+import { SHIP_SCENE_KEY, ShipScene } from './scenes/ShipScene';
 
 export const GAME_WIDTH = 960;
 export const GAME_HEIGHT = 540;
 
-/** Factory: the only place that knows the Phaser config. Add `?debug` to the URL to see hitboxes. */
-export function createGame(parent: HTMLElement, bridge: GameBridge): Phaser.Game {
-  const debug = new URLSearchParams(window.location.search).has('debug');
-
+/** Factory: the only place that knows the Phaser config. */
+export function createGame(parent: HTMLElement, deps: SceneDeps): Phaser.Game {
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
-    backgroundColor: '#0b0e1a',
+    backgroundColor: '#05070f',
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    physics: {
-      default: 'arcade',
-      arcade: { debug, gravity: { x: 0, y: 0 } },
-    },
+    // Keyboard events are read from window; never steal focus from React inputs.
+    input: { keyboard: { target: window } },
     scene: [],
   });
 
-  game.scene.add(SHIP_TEST_SCENE_KEY, ShipTestScene, false);
-  game.scene.add(BOOT_SCENE_KEY, BootScene, true, { bridge });
+  game.scene.add(SHIP_SCENE_KEY, ShipScene, false);
+  game.scene.add(BOOT_SCENE_KEY, BootScene, true, deps);
 
   // Dev-only debugging handle: `window.__stellarGame` in the browser console.
   if (import.meta.env.DEV) {
