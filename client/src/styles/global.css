@@ -165,3 +165,50 @@ body {
 .dot--bad {
   background: var(--bad);
 }
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+}
+
+.keys {
+  display: inline-flex;
+  gap: 4px;
+}
+
+kbd {
+  min-width: 28px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.hint {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--accent);
+  font-size: 0.8rem;
+}

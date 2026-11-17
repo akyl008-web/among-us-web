@@ -9,6 +9,7 @@ export interface GameBridgeEvents {
   [key: string]: unknown;
   'game:ready': { sceneKey: string };
   'game:fps': { fps: number };
+  'game:playerPosition': { x: number; y: number };
   'ui:pause': { paused: boolean };
 }
 

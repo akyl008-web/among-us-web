@@ -6,6 +6,7 @@
 among-us-web/
 ├─ shared/            @stellar/shared — контракт между клиентом и сервером
 │  └─ src/  constants.ts · game.ts (GamePhase, Role, цвета) · schemas.ts (Zod) · events.ts (Socket.IO типы)
+│           movement.ts (чистая математика движения: клиент и сервер считают одинаково)
 ├─ server/            @stellar/server — авторитетный игровой сервер
 │  └─ src/
 │     ├─ config/env.ts          валидация переменных окружения (Zod, fail-fast)
@@ -18,7 +19,11 @@ among-us-web/
 ├─ client/            @stellar/client — React (UI) + Phaser (мир)
 │  └─ src/
 │     ├─ app/                   React-экраны и панели
-│     ├─ game/                  Phaser: createGame.ts, scenes/, PhaserGame.tsx (монтирование)
+│     ├─ game/                  Phaser: createGame.ts, PhaserGame.tsx (монтирование)
+│     │  ├─ scenes/             BootScene (ресурсы) → ShipTestScene (мир, временно до этапа 3)
+│     │  ├─ entities/Player.ts  спрайт + физика + анимации, принимает MoveInput
+│     │  ├─ input/              KeyboardInput: WASD/стрелки → MoveInput (намерение)
+│     │  └─ art/                временная процедурная графика и палитра
 │     ├─ game/bridge/           GameBridge — типизированный мост React ↔ Phaser
 │     ├─ net/                   socket.ts (типизированный клиент), хуки useConnection/useServerHealth
 │     ├─ lib/                   утилиты без зависимостей от фреймворков
@@ -42,3 +47,21 @@ among-us-web/
 
 `WAITING → STARTING → PLAYING ⇄ MEETING → RESULT → (PLAYING | FINISHED)`
 Временное состояние матча — в памяти сервера (`RoomManager`), постоянные данные (профили, статистика) — PostgreSQL. Роли хранятся только на сервере и в `MatchParticipant` после окончания матча, никогда в публичном профиле.
+
+## Движение (этап 2)
+
+`KeyboardInput.read()` → `MoveInput { up, down, left, right }` → `Player.applyInput()` → `getVelocity()` из shared → Arcade Physics разрешает столкновения.
+
+- `MoveInput` — это именно то, что клиент будет отправлять серверу на этапе 6 (`player:move`). Позицию клиент не отправляет никогда.
+- Сервер будет использовать те же `getVelocity` / `stepPosition` из shared, поэтому предсказание на клиенте и авторитетная симуляция совпадают.
+- Хитбокс — 26×14 у ног, глубина спрайта = `y`, поэтому персонаж ниже по экрану рисуется поверх.
+
+## Замена временной графики
+
+`client/src/game/art/characterTextures.ts` рисует персонажа кодом. Чтобы подключить настоящий спрайт-лист, загрузите его в `BootScene.preload()` под ключом `character-<color>` с кадрами `idle-0, idle-1, walk-0..walk-3` размером 48×60. Остальной код менять не нужно.
+
+## Отладка
+
+- `?debug` — показать хитбоксы Arcade Physics.
+- `?color=<red|blue|...>` — цвет персонажа (до появления лобби).
+- В dev-режиме `window.__stellarGame` в консоли браузера — экземпляр Phaser.Game.

@@ -20,7 +20,13 @@ function Indicator({
 }
 
 /** Stage 1 diagnostics: proves client ↔ server HTTP and WebSocket links work. */
-export function StatusPanel({ fps }: { fps: number | null }) {
+export interface GameStats {
+  fps: number | null;
+  position: { x: number; y: number } | null;
+}
+
+export function StatusPanel({ stats }: { stats: GameStats }) {
+  const { fps, position } = stats;
   const health = useServerHealth();
   const conn = useConnection();
 
@@ -52,6 +58,11 @@ export function StatusPanel({ fps }: { fps: number | null }) {
         tone={fps === null ? 'warn' : 'ok'}
         label="Phaser FPS"
         value={fps === null ? 'загрузка…' : String(fps)}
+      />
+      <Indicator
+        tone={position ? 'ok' : 'warn'}
+        label="Позиция"
+        value={position ? `${position.x}, ${position.y}` : '—'}
       />
     </section>
   );
