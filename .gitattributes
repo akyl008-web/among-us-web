@@ -1,0 +1,7 @@
+# Normalize line endings: Windows teammates get LF in the repo (Prettier expects LF)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ogg binary
+*.mp3 binary
+*.woff2 binary

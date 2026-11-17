@@ -1,0 +1,46 @@
+{
+  "name": "stellar-suspects",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Stellar Suspects — browser multiplayer social deduction game (monorepo)",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "engines": {
+    "node": ">=22.12.0",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "predev": "npm run build -w @stellar/shared",
+    "dev": "concurrently -k -n shared,server,client -c magenta,cyan,green \"npm:dev -w @stellar/shared\" \"npm:dev -w @stellar/server\" \"npm:dev -w @stellar/client\"",
+    "dev:server": "npm run build -w @stellar/shared && npm run dev -w @stellar/server",
+    "dev:client": "npm run build -w @stellar/shared && npm run dev -w @stellar/client",
+    "build": "npm run build -w @stellar/shared && npm run build -w @stellar/server && npm run build -w @stellar/client",
+    "start": "npm run start -w @stellar/server",
+    "typecheck": "npm run build -w @stellar/shared && npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run build -w @stellar/shared && vitest run",
+    "test:watch": "vitest",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test",
+    "clean": "node scripts/clean.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "concurrently": "10.0.7",
+    "eslint": "10.15.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.8",
+    "globals": "17.14.0",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.73.0",
+    "vitest": "5.1.0"
+  }
+}
