@@ -17,6 +17,7 @@ const PhaserGame = lazy(() => import('../../game/PhaserGame'));
 export function GameScreen({ room }: { room: RoomView }) {
   const session = useGameSession();
   const bridge = useMemo(() => createGameBridge(), []);
+  const start = useMemo(() => ({ mode: 'online' as const, bridge, session }), [bridge, session]);
   const [task, setTask] = useState<Extract<UseTarget, { kind: 'task' }> | null>(null);
 
   // The server is the source of truth: the window is open only while the server
@@ -33,7 +34,7 @@ export function GameScreen({ room }: { room: RoomView }) {
     <div className="game-screen">
       <div className="game-stage">
         <Suspense fallback={<div className="game-loading">Загрузка корабля…</div>}>
-          <PhaserGame bridge={bridge} session={session} />
+          <PhaserGame start={start} />
         </Suspense>
         {room.phase === 'PLAYING' && (
           <Hud room={room} bridge={bridge} onOpenTask={setTask} modalOpen={activeTask !== null} />

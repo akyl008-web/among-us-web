@@ -17,8 +17,8 @@ import { characterTextureKey } from '../art/characterTextures';
 import { PlayerSprite } from '../entities/PlayerSprite';
 import { KeyboardInput } from '../input/KeyboardInput';
 import { Interpolator } from '../world/Interpolator';
+import { createShipMap } from '../world/shipMap';
 import { computeProximity, NO_PROXIMITY, sameProximity, type Proximity } from '../world/proximity';
-import { MAP_KEY, TILESET_KEY } from './BootScene';
 import type { SceneDeps } from './sceneDeps';
 
 export const SHIP_SCENE_KEY = 'ShipScene';
@@ -70,13 +70,9 @@ export class ShipScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.createMap();
+    createShipMap(this);
     this.createMarkers();
     this.keyboard = new KeyboardInput(this);
-
-    const camera = this.cameras.main;
-    camera.setBounds(0, 0, SKYWARD_MAP.widthPx, SKYWARD_MAP.heightPx);
-    camera.setBackgroundColor('#05070f');
 
     // Darkness overlay for the "lights" sabotage (crewmates only).
     this.darkness = this.add
@@ -133,36 +129,6 @@ export class ShipScene extends Phaser.Scene {
   }
 
   // ------------------------------------------------------------ world setup
-
-  private createMap(): void {
-    const map = this.make.tilemap({ key: MAP_KEY });
-    const tiles = map.addTilesetImage('skyward-tiles', TILESET_KEY);
-    if (!tiles) throw new Error('Tileset "skyward-tiles" not found in map');
-    map.createLayer('floor', tiles)?.setDepth(-1000);
-    map.createLayer('walls', tiles)?.setDepth(-900);
-    map.createLayer('decor', tiles)?.setDepth(-800);
-
-    for (const room of SKYWARD_MAP.rooms) {
-      this.add
-        .text(room.x + room.width / 2, room.y + 18, room.name.toUpperCase(), {
-          fontFamily: 'system-ui, sans-serif',
-          fontSize: '15px',
-          fontStyle: 'bold',
-          color: '#ffffff',
-        })
-        .setOrigin(0.5, 0)
-        .setAlpha(0.28)
-        .setDepth(-700);
-    }
-
-    // Emergency button on the cafeteria table
-    const b = SKYWARD_MAP.emergencyButton;
-    this.add.circle(b.x, b.y, 15, 0x7f1d1d).setDepth(-600);
-    this.add
-      .circle(b.x, b.y - 2, 12, 0xef4444)
-      .setDepth(-600)
-      .setStrokeStyle(2, 0xfecaca);
-  }
 
   private createMarkers(): void {
     for (const task of SKYWARD_MAP.tasks) {

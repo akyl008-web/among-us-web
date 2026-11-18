@@ -1178,3 +1178,23 @@ kbd {
   border-color: #991b1b;
   background: rgba(69, 10, 10, 0.96);
 }
+
+/* ------------------------------------------------------------ solo walk */
+
+.solo-bar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  width: fit-content;
+  max-width: calc(100% - 24px);
+}
+
+.solo-keys {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}

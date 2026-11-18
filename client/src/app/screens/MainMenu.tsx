@@ -14,7 +14,12 @@ import { Avatar } from '../components/Avatar';
 import { ColorPicker } from '../components/ColorPicker';
 import { AccountPanel } from './AccountPanel';
 
-export function MainMenu() {
+interface Props {
+  /** Start the offline free-roam walk (no server needed). */
+  onSolo: (name: string, color: PlayerColor) => void;
+}
+
+export function MainMenu({ onSolo }: Props) {
   const session = useGameSession();
   const { connection } = useSessionState();
   const saved = prefsStorage.load();
@@ -95,6 +100,17 @@ export function MainMenu() {
             onClick={() => void run(() => session.createRoom(nameCheck.data ?? name, color))}
           >
             Создать комнату
+          </button>
+          <button
+            type="button"
+            className="btn btn--big"
+            onClick={() => {
+              const soloName = nameCheck.success ? nameCheck.data : 'Игрок';
+              prefsStorage.save({ name: soloName, color });
+              onSolo(soloName, color);
+            }}
+          >
+            Одиночная прогулка
           </button>
           <div className="divider">
             <span>или</span>
